@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1: Convex Lens Optics Lab — 3D Linear Algebra Ray Tracing Simulator</title>
+  <meta name="description" content="Interactive 3D virtual optics lab driven by Ray Transfer Matrix Mechanics (ABCD matrices), 3x3 orthogonal vector rotations, and real-time screen image projection with circle of confusion defocus.">
+  <link rel="stylesheet" href="/src/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'><circle cx='12' cy='12' r='9' stroke='%2338bdf8' stroke-width='2' fill='none'/><path d='M12 3c3 3 4.5 6 4.5 9s-1.5 6-4.5 9' stroke='%2338bdf8' stroke-width='2' fill='none'/><path d='M12 3c-3 3-4.5 6-4.5 9s1.5 6 4.5 9' stroke='%2338bdf8' stroke-width='2' fill='none'/></svg>">
+</head>
+<body>
+  <!-- Three.js 3D Viewport -->
+  <div id="canvas-container"></div>
+
+  <!-- Laboratory Top Header -->
+  <header class="app-header">
+    <div class="brand-badge">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3c2.5 3 3.8 6 3.8 9s-1.3 6-3.8 9"/>
+        <path d="M12 3c-2.5 3-3.8 6-3.8 9s1.3 6 3.8 9"/>
+        <line x1="2" y1="12" x2="22" y2="12" stroke-dasharray="2 2"/>
+      </svg>
+      <span class="brand-title">VIRTUAL OPTICS LAB</span>
+    </div>
+    <span class="brand-tag" id="header-element-tag">CONVEX LENS</span>
+    <span class="brand-tag" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border-color: rgba(34, 197, 94, 0.3);">ABCD MATRIX ENGINE</span>
+  </header>
+
+  <!-- Left Telemetry & Mathematical Diagnostics Panel -->
+  <aside id="diagnostic-panel-container"></aside>
+
+  <!-- Floating Bottom Camera Quick Bar -->
+  <nav class="camera-bar" aria-label="Camera Controls">
+    <button class="cam-btn active" data-view="perspective" title="3D Orbit View">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <span>3D Orbit</span>
+    </button>
+    <button class="cam-btn" data-view="side" title="Side Elevation Y-Z Bench Plane">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      <span>Side (Y-Z)</span>
+    </button>
+    <button class="cam-btn" data-view="top" title="Top-Down X-Z Plane">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      <span>Top (X-Z)</span>
+    </button>
+    <button class="cam-btn" data-view="screen" title="Screen Projection Detector POV">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Screen POV</span>
+    </button>
+    <button class="cam-btn" data-view="lens" title="Look Through Lens">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Lens POV</span>
+    </button>
+  </nav>
+
+  <!-- Linear Algebra Engine Modal Dialog (from Python Lab) -->
+  <div id="linalg-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pulse-dot"></span>
+          <span>VIRTUAL OPTICS LAB: MATRIX ENGINE (ABCD & AFFINE)</span>
+        </div>
+        <button id="modal-close-btn" class="modal-close" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <pre id="linalg-modal-content" class="modal-code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Bootstrap -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
