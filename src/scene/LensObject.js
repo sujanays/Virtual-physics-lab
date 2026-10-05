@@ -51,7 +51,7 @@ export class LensObject {
       dispersion: 0.025
     });
 
-    // Highly polished reflective mirror material with reflection texture mapping
+    // Highly polished reflective mirror material (DoubleSide so geometry is always lit)
     this.mirrorMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.08,
@@ -60,10 +60,44 @@ export class LensObject {
       emissive: 0xffffff,
       emissiveMap: this.mirrorTexture,
       emissiveIntensity: 0.95,
-      side: THREE.DoubleSide
+      side: THREE.FrontSide   // front face = mirror image
     });
 
-    // Metallic spoon casing material (back of concave mirror or bezel)
+    // "SILVERED" label canvas — shown on the non-reflective (back) face of mirrors
+    const silvCanvas = document.createElement('canvas');
+    silvCanvas.width = 512;
+    silvCanvas.height = 512;
+    const silvCtx = silvCanvas.getContext('2d');
+    // White background
+    silvCtx.fillStyle = '#ffffff';
+    silvCtx.fillRect(0, 0, 512, 512);
+    // Thin light-grey border
+    silvCtx.strokeStyle = '#cccccc';
+    silvCtx.lineWidth = 6;
+    silvCtx.strokeRect(10, 10, 492, 492);
+    // Bold "SILVERED" text centred
+    silvCtx.fillStyle = '#000000';
+    silvCtx.font = 'bold 80px Arial, sans-serif';
+    silvCtx.textAlign = 'center';
+    silvCtx.textBaseline = 'middle';
+    silvCtx.fillText('SILVERED', 256, 256);
+    // Sub-label
+    silvCtx.font = '32px Arial, sans-serif';
+    silvCtx.fillStyle = '#444444';
+    silvCtx.fillText('(non-reflecting side)', 256, 340);
+
+    this.silveredTexture = new THREE.CanvasTexture(silvCanvas);
+    this.silveredTexture.anisotropy = 4;
+
+    // BackSide material so it only shows on the back face of the mirror mesh
+    this.silveredMaterial = new THREE.MeshStandardMaterial({
+      map: this.silveredTexture,
+      side: THREE.BackSide,
+      roughness: 0.9,
+      metalness: 0.0
+    });
+
+    // Dark metallic back casing for mirrors
     this.spoonCasingMaterial = new THREE.MeshStandardMaterial({
       color: 0x242d38,
       metalness: 0.88,
@@ -183,27 +217,7 @@ export class LensObject {
     lensMesh.castShadow = true;
     this.gimbalGroup.add(lensMesh);
 
-    // Dark metallic lab-mount bezel ring (clearly visible in reference image)
-    const bezelMat = new THREE.MeshStandardMaterial({
-      color: 0x14181f,
-      metalness: 0.95,
-      roughness: 0.12
-    });
-    // Outer ring wraps the glass rim
-    const bezelRingGeo = new THREE.TorusGeometry(radiusAperture + 0.08, 0.42, 20, 80);
-    bezelRingGeo.rotateX(Math.PI / 2);
-    const bezelRingMesh = new THREE.Mesh(bezelRingGeo, bezelMat);
-    this.gimbalGroup.add(bezelRingMesh);
-
-    // Thin flat annular disc face (front bezel face — matches image dark ring)
-    const bezelFaceGeo = new THREE.RingGeometry(radiusAperture, radiusAperture + 0.5, 64);
-    const bezelFaceMeshF = new THREE.Mesh(bezelFaceGeo, bezelMat);
-    bezelFaceMeshF.position.z = -rimThickness / 2;
-    const bezelFaceMeshB = new THREE.Mesh(bezelFaceGeo, bezelMat);
-    bezelFaceMeshB.position.z = rimThickness / 2;
-    bezelFaceMeshB.rotation.y = Math.PI;
-    this.gimbalGroup.add(bezelFaceMeshF);
-    this.gimbalGroup.add(bezelFaceMeshB);
+    // No bezel ring — clean glass-only lens
 
     this.buildBottomSupport(radiusAperture, rimThickness);
   }
@@ -318,6 +332,10 @@ export class LensObject {
     mirrorFrontMesh.castShadow = true;
     this.gimbalGroup.add(mirrorFrontMesh);
 
+    // Back face of the bowl surface — shows "SILVERED" label in black on white
+    const silveredMeshC = new THREE.Mesh(frontGeo, this.silveredMaterial);
+    this.gimbalGroup.add(silveredMeshC);
+
     // ── Protective back shell (opaque housing behind the reflective bowl) ──
     // Same profile as front face but offset by shellThickness toward +Z
     const backPoints = [];
@@ -336,13 +354,7 @@ export class LensObject {
     spoonBackMesh.castShadow = true;
     this.gimbalGroup.add(spoonBackMesh);
 
-    // Bezel rim at the mouth (z = 0 plane, where bowl opens toward object)
-    const rimGeo = new THREE.TorusGeometry(radiusAperture + 0.05, 0.18, 14, 64);
-    rimGeo.rotateX(Math.PI / 2);
-    const rimMesh = new THREE.Mesh(rimGeo, this.spoonCasingMaterial);
-    rimMesh.position.z = 0; // mouth of bowl
-    this.gimbalGroup.add(rimMesh);
-
+    // Horizontal bezel rim removed — keeps lens aperture unobstructed
     this.buildBottomSupport(radiusAperture, shellThickness);
   }
 
@@ -389,6 +401,10 @@ export class LensObject {
     mirrorFrontMesh.castShadow = true;
     this.gimbalGroup.add(mirrorFrontMesh);
 
+    // Back face of the dome surface — shows "SILVERED" label in black on white
+    const silveredMeshV = new THREE.Mesh(frontGeo, this.silveredMaterial);
+    this.gimbalGroup.add(silveredMeshV);
+
     // ── Opaque rear housing (sits behind the dome toward +Z) ──────────────
     // Same dome profile shifted by shellThickness toward +Z
     const backPoints = [];
@@ -407,13 +423,7 @@ export class LensObject {
     backMesh.castShadow = true;
     this.gimbalGroup.add(backMesh);
 
-    // Bezel rim at the base of dome (z = 0 plane)
-    const rimGeo = new THREE.TorusGeometry(radiusAperture + 0.05, 0.18, 14, 64);
-    rimGeo.rotateX(Math.PI / 2);
-    const rimMesh = new THREE.Mesh(rimGeo, this.spoonCasingMaterial);
-    rimMesh.position.z = 0;
-    this.gimbalGroup.add(rimMesh);
-
+    // Horizontal bezel rim removed — keeps lens aperture unobstructed
     this.buildBottomSupport(radiusAperture, shellThickness);
   }
 
