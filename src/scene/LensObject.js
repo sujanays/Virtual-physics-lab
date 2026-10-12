@@ -250,24 +250,22 @@ export class LensObject {
     // Flat horizontal TOP face  (back → front)
     shape.lineTo(-tEdge / 2, +halfH);
 
-    // FRONT concave arc: from (−tEdge/2, +halfH) down to (−tEdge/2, −halfH)
-    // Arc bows INWARD (toward +X / back of lens) reaching −tCenter/2 at center y=0
+    // FRONT concave arc: thick at both ends and thin at the center.
     for (let i = 1; i <= segs; i++) {
       const y    = halfH - (2 * halfH * i) / segs;
-      const yN   = y / halfH;                          // -1 → +1
-      const zFront = -(tCenter / 2) - sagittaZ * (1.0 - yN * yN);
+      const yN   = y / halfH;
+      const zFront = -(tEdge / 2) + sagittaZ * (1.0 - yN * yN);
       shape.lineTo(zFront, y);
     }
 
     // Flat horizontal BOTTOM face  (front → back)
     shape.lineTo(+tEdge / 2, -halfH);
 
-    // BACK concave arc: from (+tEdge/2, −halfH) up to (+tEdge/2, +halfH)
-    // Mirror of front arc, reaching +tCenter/2 at center y=0
+    // BACK concave arc mirrors the front, reaching +tCenter/2 at the center.
     for (let i = 1; i <= segs; i++) {
       const y    = -halfH + (2 * halfH * i) / segs;
       const yN   = y / halfH;
-      const zBack = +(tCenter / 2) + sagittaZ * (1.0 - yN * yN);
+      const zBack = +(tEdge / 2) - sagittaZ * (1.0 - yN * yN);
       shape.lineTo(zBack, y);
     }
     shape.closePath();
